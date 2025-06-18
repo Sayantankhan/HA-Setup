@@ -1,15 +1,41 @@
-> docker compose build
-> docker compose up -d
+# HA-Setup: High Availability with Pacemaker + Corosync + Docker
 
-Inside Each Node
-> docker exec -it node1 bash
-> systemctl start corosync
-> systemctl start pacemaker
+This repository sets up a simple high-availability (HA) cluster using **Pacemaker** and **Corosync** across multiple Docker containers. It includes an example service (`flask-api`) managed as a cluster resource.
 
+---
+
+## 🚀 Quick Start
+
+### Build and Start Cluster
+```bash
+docker compose build
+docker compose up -d
+```
+
+---
+
+## 🐧 Inside Each Node
+
+Once the containers are running, you can access and configure each node:
+
+```bash
+docker exec -it node1 bash
+systemctl start corosync
+systemctl start pacemaker
+```
+
+---
+
+## 🛠️ Cluster Configuration
+
+### Disable STONITH and Quorum Check
 ```bash
 crm configure property stonith-enabled=false
 crm configure property no-quorum-policy=ignore
+```
 
+### Add the Flask API as a Cluster Resource
+```bash
 crm configure primitive flask-api ocf:heartbeat:anything \
   params binfile="/usr/local/bin/start-api" \
          pidfile="/var/run/flask-api.pid" \
@@ -18,34 +44,85 @@ crm configure primitive flask-api ocf:heartbeat:anything \
 
 crm configure colocation col_api inf: flask-api
 crm configure order order_api inf: flask-api
-
 ```
 
+### Monitor Resource Status
+```bash
 crm status
-
 watch crm status
+```
 
--- PaceMaker Rules ---
+---
 
-# Make node1 preferred (active)
+## 🎯 Pacemaker Rules
+
+### Set Node Preferences
+
+- **Prefer `node1` (Active)**
+```bash
 crm configure location prefer-node1 flask-api 100: node1
+```
 
-# Lower priority for node2 (hot standby)
+- **Set Lower Priority for Standby Nodes**
+```bash
 crm configure location prefer-node2 flask-api 50: node2
-
-# Even lower for node3 (cold standby)
 crm configure location prefer-node3 flask-api 10: node3
+```
 
-# Cold Standby
+- **Cold Standby (Avoid a Node Completely)**
+```bash
 crm configure location avoid-node3 flask-api -INFINITY: node3
+```
 
-# Remove the rule
-# Clear Old Constraints
+- **Remove a Rule**
+```bash
 crm configure delete avoid-node3
+```
 
-# Set Resource Location Constraint - Manually promote a node
+---
+
+### Manual Overrides
+
+- **Force Resource to Run on node2**
+```bash
 crm configure location force-api-on-node2 flask-api inf: node2
-# This tells Pacemaker: "Run flask-api on node2 no matter what."
+```
 
-# Manually Stop on Current Node
+- **Manually Stop the Resource**
+```bash
 crm resource stop flask-api
+```
+
+---
+
+## 🧩 Components
+
+- **Pacemaker**: Cluster resource manager
+- **Corosync**: Messaging layer to sync cluster state
+- **Docker**: Lightweight environment to simulate multiple HA nodes
+- **Anything OCF Agent**: Used to wrap arbitrary scripts/services
+
+---
+
+## 📁 Project Structure
+
+```
+HA-Setup/
+├── docker-compose.yml
+├── setup files
+├── Dockerfile
+└── README.md
+```
+
+---
+
+## 📌 Notes
+
+- This setup is ideal for **learning**, **testing**, and **POCs**.
+- For production-grade HA, consider shared storage, fencing/STONITH, and secure authentication.
+
+---
+
+## 📜 License
+
+MIT License
