@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  node1:
+    build: .
+    container_name: node1
+    hostname: node1
+    privileged: true
+    networks:
+      ha_net:
+        ipv4_address: 10.0.0.11
+    volumes:
+      - ./corosync.conf:/etc/corosync/corosync.conf
+    ports:
+      - "5001:5000"
+
+  node2:
+    build: .
+    container_name: node2
+    hostname: node2
+    privileged: true
+    networks:
+      ha_net:
+        ipv4_address: 10.0.0.12
+    volumes:
+      - ./corosync.conf:/etc/corosync/corosync.conf
+    ports:
+      - "5002:5000"
+
+networks:
+  ha_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+
