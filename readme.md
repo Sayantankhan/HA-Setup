@@ -94,7 +94,40 @@ crm resource stop flask-api
 ```
 
 ---
+## DRBD Configuration
 
+Correct Host-Side Commands to Install DRBD
+```bash
+sudo apt update
+sudo apt install -y curl gnupg
+
+# 5. Update apt and install DRBD
+sudo apt update
+sudo apt install -y drbd-dkms drbd-utils
+
+# 6. Load the DRBD module
+sudo modprobe drbd
+```
+
+```bash 
+drbdadm --version
+lsmod | grep drbd
+```
+
+
+```bash
+docker exec -it node1 /usr/local/bin/drbd-init.sh
+docker exec -it node2 /usr/local/bin/drbd-init.sh
+```
+
+Then on node1 to promote:
+```bash
+drbdadm -- --overwrite-data-of-peer primary drbddata
+mkfs.ext4 /dev/drbd0
+mount /dev/drbd0 /mnt/drbddata
+```
+
+---
 ## 🧩 Components
 
 - **Pacemaker**: Cluster resource manager
