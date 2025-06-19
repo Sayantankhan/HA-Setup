@@ -6,11 +6,13 @@ services:
     container_name: node1
     hostname: node1
     privileged: true
+    environment:
+      - APP_ID=node1
     networks:
       ha_net:
         ipv4_address: 10.0.0.11
     volumes:
-      - ./corosync.conf:/etc/corosync/corosync.conf
+      - ./config/corosync.conf:/etc/corosync/corosync.conf
     ports:
       - "5001:5000"
 
@@ -19,13 +21,26 @@ services:
     container_name: node2
     hostname: node2
     privileged: true
+    environment:
+      - APP_ID=node2
     networks:
       ha_net:
         ipv4_address: 10.0.0.12
     volumes:
-      - ./corosync.conf:/etc/corosync/corosync.conf
+      - ./config/corosync.conf:/etc/corosync/corosync.conf
     ports:
       - "5002:5000"
+  
+  haproxy:
+    image: haproxy:2.9
+    container_name: haproxy
+    volumes:
+      - ./config/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "5005:5000"  # expose HAProxy on host:5000
+    networks:
+      ha_net:
+        ipv4_address: 10.0.0.10
 
 networks:
   ha_net:

@@ -16,6 +16,11 @@ docker compose up -d
 
 ## 🐧 Inside Each Node
 
+Run this 
+```bash
+docker exec -it node1 /usr/local/bin/init-pacemaker.sh
+```
+
 Once the containers are running, you can access and configure each node:
 
 ```bash
