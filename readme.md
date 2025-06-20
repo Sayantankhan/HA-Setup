@@ -55,6 +55,7 @@ crm configure order order_api inf: flask-api
 ```bash
 crm status
 watch crm status
+crm_resource --resource flask-api --locate
 ```
 
 ---
@@ -84,6 +85,11 @@ crm configure location avoid-node3 flask-api -INFINITY: node3
 crm configure delete avoid-node3
 ```
 
+- ### Put a Node in Standby
+```bash
+crm node standby node4
+```
+
 ---
 
 ### Manual Overrides
@@ -97,6 +103,49 @@ crm configure location force-api-on-node2 flask-api inf: node2
 ```bash
 crm resource stop flask-api
 ```
+---
+
+## ⚖️ Multi-Node Quorum & Resource Types
+
+### Primitive vs Clone Behavior
+
+- A `primitive` in Pacemaker is meant to run on **exactly one node at a time**.
+- Pacemaker assumes running it on multiple nodes may cause conflicts (ports, data integrity, etc.).
+- If you want to run the same service **on multiple nodes in parallel**, use a **`clone`**.
+
+### Best Practice
+
+✅ Do this:
+- Define a `primitive` → defines what to run
+- Wrap it in a `clone` → tells Pacemaker to run it on multiple nodes
+
+```bash
+sudo docker compose -f docker-compose-multinode.yml up -d
+sudo docker exec -it node1 /usr/local/bin/init-pacemaker-multi-member.sh
+```
+
+```bash
+sudo docker exec -it node2 bash
+crm_resource --resource flask-api --locate
+crm configure clone flask-api-clone flask-api meta clone-max=3
+```
+
+## Updating clone numbers:
+```crm
+clone flask-api-clone flask-api \
+    meta clone-max="3"
+```
+
+### Disabling Quorum Check
+```bash
+crm configure property no-quorum-policy=ignore
+```
+### Cleaning a Failed
+```bash
+crm resource cleanup flask-api
+```
+
+`clone-max` defines how many **copies (instances)** of the service are allowed to run cluster-wide. The purpose of clone-max in:  how many copies (instances) of the clone Pacemaker is allowed to run at the same time across the cluster.
 
 ---
 ## DRBD Configuration

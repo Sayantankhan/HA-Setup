@@ -13,7 +13,9 @@ RUN pip3 install flask
 COPY app.py /usr/local/bin/app.py
 
 COPY config/init-pacemaker.sh /usr/local/bin/
+COPY config/init-pacemaker-multi-member.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/init-pacemaker.sh
+RUN chmod +x /usr/local/bin/init-pacemaker-multi-member.sh
 
 # Optional wrapper to run under Pacemaker control
 RUN echo -e '#!/bin/bash\npython3 /usr/local/bin/app.py' > /usr/local/bin/start-api && chmod +x /usr/local/bin/start-api

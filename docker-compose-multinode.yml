@@ -1,0 +1,70 @@
+version: "3"
+
+services:
+  node1:
+    build: .
+    container_name: node1
+    hostname: node1
+    privileged: true
+    environment:
+      - APP_ID=node1
+    networks:
+      ha_net:
+        ipv4_address: 10.0.0.11
+    volumes:
+      - ./config/corosync-multi-node.conf:/etc/corosync/corosync.conf
+    ports:
+      - "5001:5000"
+
+  node2:
+    build: .
+    container_name: node2
+    hostname: node2
+    privileged: true
+    environment:
+      - APP_ID=node2
+    networks:
+      ha_net:
+        ipv4_address: 10.0.0.12
+    volumes:
+      - ./config/corosync-multi-node.conf:/etc/corosync/corosync.conf
+    ports:
+      - "5002:5000"
+  
+  node3:
+    build: .
+    container_name: node3
+    hostname: node3
+    privileged: true
+    environment:
+      - APP_ID=node3
+    networks:
+      ha_net:
+        ipv4_address: 10.0.0.13
+    volumes:
+      - ./config/corosync-multi-node.conf:/etc/corosync/corosync.conf
+    ports:
+      - "5003:5000"
+
+  node4:
+    build: .
+    container_name: node4
+    hostname: node4
+    privileged: true
+    environment:
+      - APP_ID=node4
+    networks:
+      ha_net:
+        ipv4_address: 10.0.0.14
+    volumes:
+      - ./config/corosync-multi-node.conf:/etc/corosync/corosync.conf
+    ports:
+      - "5004:5000"
+
+networks:
+  ha_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+
